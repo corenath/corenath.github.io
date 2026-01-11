@@ -1,6 +1,11 @@
 const list = document.getElementById("article-list");
-const titleEl = document.getElementById("article-title");
+const articleView = document.getElementById("article-view");
 const contentEl = document.getElementById("article-content");
+const backBtn = document.getElementById("back");
+
+backBtn.addEventListener("click", () => {
+  location.hash = "";
+});
 
 let articles = [];
 
@@ -9,7 +14,7 @@ fetch("articles.json")
   .then(data => {
     articles = data;
     renderList();
-    renderArticle();
+    onHashChange();
   });
 
 function renderList() {
@@ -23,15 +28,17 @@ function renderList() {
   });
 }
 
-async function renderArticle() {
+async function onHashChange() {
   const id = location.hash.slice(1);
   const article = articles.find(a => a.id === id);
-  if (!article) return;
-
-  titleEl.textContent = article.title;
+  if (!article) {
+    articleView.classList.add("hidden");
+    return;
+  }
 
   const md = await fetch(`articles/${article.file}`).then(r => r.text());
   contentEl.innerHTML = marked.parse(md);
+  articleView.classList.remove("hidden");
 }
 
-window.addEventListener("hashchange", renderArticle);
+window.addEventListener("hashchange", onHashChange);
